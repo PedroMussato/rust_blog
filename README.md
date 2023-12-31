@@ -4,7 +4,6 @@ The main idea is to have a blog in RUST.
 
 To complete it I'll split this challenge in some parts:
 ## Auth
- - [ ] Create schema draw.io file
  - [ ] Create home page (nothing more than a blank page neede)
  - [ ] Create register page:
  - Must to require username, email and password
