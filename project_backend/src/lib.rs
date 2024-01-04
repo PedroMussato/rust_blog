@@ -114,7 +114,11 @@ fn is_valid_email(m: &str) -> bool {
  */
 
 
-pub async fn register(payload: Json<RegisterPayload>) -> AxumJson<RegisterResponse> {
+pub async fn register(mut payload: Json<RegisterPayload>) -> AxumJson<RegisterResponse> {
+    
+    payload.username = payload.username.to_lowercase();
+    payload.email = payload.email.to_lowercase();
+    
     let mut response = RegisterResponse {
         code : 200,
         description : "".to_string() 
@@ -169,7 +173,8 @@ pub async fn register(payload: Json<RegisterPayload>) -> AxumJson<RegisterRespon
     let connection = &mut establish_connection();
 
     if response.code != 200 {
-
+        return AxumJson(response);
+    } else  {
         // Check if a user with this username already exists
         let username_results = auth_users
             .filter(username.eq(&payload.username.to_string()))
@@ -181,27 +186,29 @@ pub async fn register(payload: Json<RegisterPayload>) -> AxumJson<RegisterRespon
             response.code = 400;
             response.description += "-This username is already in use";
         }
-        
         // Check if a user with this email already exists
         let email_results = auth_users
             .filter(email.eq(&payload.email.to_string()))
             .select(AuthUsers::as_select())
             .load(connection)
             .expect("Error loading posts");
+
         if email_results.len() != 0 {
             response.code = 400;
             response.description += "-This email is already in use";
-        }
-    } else {
+
+        } 
+    }
+
+    if response.code == 200 {
         let new_user = NewAuthUsers {
             id : &Uuid::new_v4(),
             username : &payload.username.to_string(),
             fullname : &payload.fullname.to_string(),
             email : &payload.email.to_string(),
-            password : &hash_sha512_256(&payload.password.to_string()),
+            password : &hash_sha512_256(&payload.password.to_string()),    
         };
-        create_user(connection, new_user);
-
+        create_user(connection, new_user);    
     }
 
     return AxumJson(response);
