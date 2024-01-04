@@ -102,7 +102,7 @@ fn is_valid_email(m: &str) -> bool {
  
  #[derive(Debug, Deserialize, Serialize)]
  pub struct RegisterResponse{
-     code : i32,
+    is_ok : bool,
      description : String,
  }
 
@@ -120,59 +120,59 @@ pub async fn register(mut payload: Json<RegisterPayload>) -> AxumJson<RegisterRe
     payload.email = payload.email.to_lowercase();
     
     let mut response = RegisterResponse {
-        code : 200,
+        is_ok : true,
         description : "".to_string() 
     };
 
     // Check if both passwords match
     if payload.password != payload.password_confirmation {
-        response.code = 400;
+        response.is_ok = false;
         response.description += "-Password mismtach";
     } else {
         // Check if the string have 8 digits or more
         let char_count = payload.password.chars().count();        
         if char_count < 8 {
-            response.code = 400;
+            response.is_ok = false;
             response.description += "-Password is too short, use passwords with 8 or more characters";
         }
         
         // Check if the password contains an UPPER CASE letter
         let contains_uppercase = !payload.password.chars().any(|c| c.is_ascii_uppercase());
         if contains_uppercase {
-            response.code = 400;
+            response.is_ok = false;
             response.description += "-Password doesn't contains upper case letters";
         }
 
         // Check if the password contains an lower case letter
         let contains_lowercase = !payload.password.chars().any(|c| c.is_ascii_lowercase());
         if contains_lowercase {
-            response.code = 400;
+            response.is_ok = false;
             response.description += "-Password doesn't contains lowe case letters";
         }
 
         // Check if the password contains an number letter
         let contains_numbers = !payload.password.chars().any(|c| c.is_digit(10));
         if contains_numbers {
-            response.code = 400;
+            response.is_ok = false;
             response.description += "-Password doesn't contains numbers";
         }
     }
 
     // check if the username is valid
     if !payload.username.chars().all(|c| c.is_ascii_alphanumeric()) {
-        response.code = 400;
+        response.is_ok = false;
         response.description += "-The username isn't valid, must contain only letters and numbers";
     }
 
     // check if the email is valid
     if !is_valid_email(&payload.email.to_string()) {
-        response.code = 400;
+        response.is_ok = false;
         response.description += "-This email isn't valid";
     }
 
     let connection = &mut establish_connection();
 
-    if response.code != 200 {
+    if response.is_ok != true {
         return AxumJson(response);
     } else  {
         // Check if a user with this username already exists
@@ -183,7 +183,7 @@ pub async fn register(mut payload: Json<RegisterPayload>) -> AxumJson<RegisterRe
             .expect("Error loading posts");
 
         if username_results.len() != 0 {
-            response.code = 400;
+            response.is_ok = false;
             response.description += "-This username is already in use";
         }
         // Check if a user with this email already exists
@@ -194,13 +194,13 @@ pub async fn register(mut payload: Json<RegisterPayload>) -> AxumJson<RegisterRe
             .expect("Error loading posts");
 
         if email_results.len() != 0 {
-            response.code = 400;
+            response.is_ok = false;
             response.description += "-This email is already in use";
 
         } 
     }
 
-    if response.code == 200 {
+    if response.is_ok == true {
         let new_user = NewAuthUsers {
             id : &Uuid::new_v4(),
             username : &payload.username.to_string(),
