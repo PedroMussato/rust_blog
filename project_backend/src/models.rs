@@ -1,6 +1,8 @@
 use diesel::prelude::*;
-use crate::schema::auth_users;
+use crate::schema::{auth_users, auth_user_session_tokens};
 use uuid::Uuid;
+
+////////////////////////////////////REGISTER//////////////////////////////////////
 
 #[derive(Queryable, Selectable)]
 #[diesel(table_name = auth_users)]
@@ -22,4 +24,21 @@ pub struct NewAuthUsers<'a> {
     pub fullname: &'a String,
     pub email: &'a String,
     pub password: &'a String,
+}
+
+///////////////////////////////////LOGIN///////////////////////////////////////
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = auth_user_session_tokens)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct AuthUserSessionTokens {
+    pub id: Uuid,
+    pub fk_user: Uuid,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = auth_user_session_tokens)]
+pub struct NewAuthUserSessionTokens<'a> {
+    pub id: &'a Uuid,
+    pub fk_user: &'a Uuid,
 }

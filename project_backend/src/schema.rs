@@ -1,6 +1,13 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    auth_user_session_tokens (id) {
+        id -> Uuid,
+        fk_user -> Uuid,
+    }
+}
+
+diesel::table! {
     auth_users (id) {
         id -> Uuid,
         #[max_length = 64]
@@ -13,3 +20,10 @@ diesel::table! {
         password -> Varchar,
     }
 }
+
+diesel::joinable!(auth_user_session_tokens -> auth_users (fk_user));
+
+diesel::allow_tables_to_appear_in_same_query!(
+    auth_user_session_tokens,
+    auth_users,
+);
