@@ -8,18 +8,17 @@ use uuid::Uuid;
 #[diesel(table_name = auth_users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct AuthUsers {
-    pub id: Uuid,
+    pub user_id: Uuid,
     pub username: String,
     pub fullname: String,
     pub email: String,
     pub password: String,
 }
 
-
 #[derive(Insertable)]
 #[diesel(table_name = auth_users)]
 pub struct NewAuthUsers<'a> {
-    pub id: &'a Uuid,
+    pub user_id: &'a Uuid,
     pub username: &'a String,
     pub fullname: &'a String,
     pub email: &'a String,
@@ -32,13 +31,13 @@ pub struct NewAuthUsers<'a> {
 #[diesel(table_name = auth_user_session_tokens)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct AuthUserSessionTokens {
-    pub id: Uuid,
+    pub session_token_id: Uuid,
     pub fk_user: Uuid,
 }
 
 #[derive(Insertable)]
 #[diesel(table_name = auth_user_session_tokens)]
 pub struct NewAuthUserSessionTokens<'a> {
-    pub id: &'a Uuid,
+    pub session_token_id: &'a Uuid,
     pub fk_user: &'a Uuid,
 }

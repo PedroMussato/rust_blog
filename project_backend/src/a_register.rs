@@ -8,9 +8,7 @@ use axum::{extract::Json, response::Json as AxumJson};
 use serde::{Deserialize, Serialize};
 use diesel::prelude::*;
 use uuid::Uuid;
-use crate::functions::establish_connection;
-use crate::functions::is_valid_email;
-use crate::authentication::{Response, hash_sha512_256, create_user}; 
+use crate::authentication::{Response, hash_sha512_256, create_user, establish_connection, is_valid_email};
 use crate::models::{NewAuthUsers, AuthUsers};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -85,6 +83,7 @@ pub async fn register(mut payload: Json<RegisterPayload>) -> AxumJson<Response> 
     if response.is_ok != true {
         return AxumJson(response);
     } else  {
+        
         // Check if a user with this username already exists
         let username_results = auth_users
             .filter(username.eq(&payload.username.to_string()))
@@ -112,7 +111,7 @@ pub async fn register(mut payload: Json<RegisterPayload>) -> AxumJson<Response> 
     
     if response.is_ok == true {
         let new_user = NewAuthUsers {
-            id : &Uuid::new_v4(),
+            user_id : &Uuid::new_v4(),
             username : &payload.username.to_string(),
             fullname : &payload.fullname.to_string(),
             email : &payload.email.to_string(),

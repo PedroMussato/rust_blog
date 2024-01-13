@@ -12,7 +12,7 @@ use uuid::Uuid;
 
 use diesel::prelude::*;
 use diesel::delete;
-use crate::functions::establish_connection;
+use crate::authentication::establish_connection;
 
 use crate::schema::auth_user_session_tokens::dsl::*;
 
@@ -28,7 +28,7 @@ pub async fn logout(payload: Json<LogoutPayload>) -> AxumJson<Response> {
     let token = Uuid::parse_str(&payload.session_token.to_string());
 
     let num_deleted = delete(auth_user_session_tokens
-        .filter(id.eq_any(token)))
+        .filter(session_token_id.eq_any(token)))
         .execute(connection)
         .expect("Error loading user");
     

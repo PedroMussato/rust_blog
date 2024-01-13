@@ -1,15 +1,15 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    auth_user_session_tokens (id) {
-        id -> Uuid,
+    auth_user_session_tokens (session_token_id) {
+        session_token_id -> Uuid,
         fk_user -> Uuid,
     }
 }
 
 diesel::table! {
-    auth_users (id) {
-        id -> Uuid,
+    auth_users (user_id) {
+        user_id -> Uuid,
         #[max_length = 64]
         username -> Varchar,
         #[max_length = 128]

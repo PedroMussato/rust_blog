@@ -2,8 +2,7 @@ use axum::{extract::Json, response::Json as AxumJson};
 use diesel::{ExpressionMethods, BoolExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::authentication::{hash_sha512_256, Response, create_token};
-use crate::functions::establish_connection;
+use crate::authentication::{hash_sha512_256, Response, create_token, establish_connection};
 use crate::models::{NewAuthUserSessionTokens, AuthUsers};
 use crate::schema::auth_users::dsl::*;
 
@@ -38,15 +37,15 @@ pub async fn login(payload: Json<LoginPayload>) -> AxumJson<Response> {
         if user.password == hash_password_sent {
             // Passwords match, login successful
             let new_token = NewAuthUserSessionTokens {
-                id : &Uuid::new_v4(),
-                fk_user : & user.id,
+                session_token_id : &Uuid::new_v4(),
+                fk_user : & user.user_id,
             };
 
             let token = create_token(&mut connection, new_token);
 
             response = Response {
                 is_ok: true,
-                description: format!("{}", token.id).to_string(),
+                description: format!("{}", token.session_token_id),
             };
 
         } else {
@@ -55,6 +54,11 @@ pub async fn login(payload: Json<LoginPayload>) -> AxumJson<Response> {
                 description: "Invalid login informations".to_string(),
             };
         }
+    } else {
+        response = Response {
+            is_ok: false,
+            description: "Invalid login informations".to_string(),
+        };
     }
 
     return AxumJson(response);
